@@ -1,0 +1,32 @@
+\chapter{Direct model of reporting intervals}
+
+
+\section{Modeling observed reporting data.}
+
+The reporting delays, $t_d$, are observed.  These can be modelled
+directly as, for example, having a weibull distribution.  To estimate
+such a model we would:
+
+\begin{enumerate}
+\item load all data with the columns: \begin{itemize}
+	\item $t_r$, the date of the report delivery.
+	\item $t_s$, the date of illness.
+	\item $t_d=t_r - t_s$, the reporting delay.
+	\item $j$, the province.
+	\end{itemize}
+\end{enumerate}
+
+Weibull model in Stan..., etc...
+
+This lets us estimate parameter for a posterior density
+$p(t_d|\theta_d)$.  If we use $t_s$ as a covariate and apply
+an offset Weibull model, we are instead modeling $p(t_r|\theta_d,t_s)$
+which is the object of interest minus the excess variance introduced
+by integrating out $t_s$.  The excess variance could be reintroduced in
+an ad-hoc fashion at a later stage or simply ignored for a first
+approximation to the reporting process.
+
+
+
+
+

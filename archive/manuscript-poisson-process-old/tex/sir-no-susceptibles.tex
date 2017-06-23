@@ -1,0 +1,141 @@
+\chapter{The SIR model can be restated to ignore susceptibles.}\label{chap:sir-nosusceptibles}
+%\epigraph{}{ }
+
+The SI model is a simplification of the SIR model for a disease where infectious individuals leave
+the infectious pool after one time step.  
+
+\section{SI case}
+The SI model  can be stated as a pair of equations describing
+the size of the susceptible (S) and infected (I) population at time $t$
+in terms of the system state at time $t-1$ and three groups of parameters: 
+1) $r_t$, which describes the infectiousness of the disease at time $t$;
+2) $\alpha_1$, and $\alpha_2$ which describe how effectively the
+infected interact with the susceptible population and how effectively
+the susceptible population mixes with the infected population; and 3)
+the error terms $\epsilon_t$ and $u_t$.  The model is stated in equation
+\ref{eq:sir-basic}.
+
+\begin{align}\label{eq:sir-basic}
+I_t &= r_t I_{t-1}^{\alpha_1} S_{t-1}^{\alpha_2} \epsilon_{t} \\
+S_t &= B_{t-d} + S_{t-1} - I_t + u_t
+\end{align}
+
+One of the difficulties of applying this model is that the state
+variables are not observed directly.  Only a case count (C) is observed
+which is related to the number infected at time $t$ through a reporting
+fraction $\rho_t$ as $I_t = \rho_t C_t$.  For estimation and to
+understand the confounding which results from these limited observations
+it would be useful to state the model in terms of infected individuals
+only, leaving aside the dynamics of the susceptible population.
+According to CITE CITE CITE this can be accomplished.  First we begin
+by shifting the susceptible equation one time step back and using it to 
+replace the $S_{t-1}$ term in the infectious equation:
+
+\begin{align}
+I_t &= r_t I_{t-1}^{\alpha_1} 
+	\left[
+		B_{t-1-d} + S_{t-2} - I_{t-1} + u_{t-1}
+	\right]^{\alpha_2} \epsilon_{t} \\
+\end{align}
+
+Now the only term left for susceptibles is $S_{t-2}$ which we can
+replace by shifting the infectious equation back one time step and
+isolating $S$ on one side.
+
+\begin{align}
+S_{t-1}^{\alpha_2} &= \frac{I_t}{r_t I_{t-1}^{\alpha_1} \epsilon_{t}} \\
+\alpha_2 \log S_{t-1} &= \log I_t - \log r_t - \alpha_1 \log I_{t-1} - \log \epsilon_{t}  \\
+\log S_{t-1} &= \frac{\log I_t - \log r_t - \alpha_1 \log I_{t-1} - \log \epsilon_{t}}{\alpha_2}  \\
+\log S_{t-2} &= \frac{\log I_{t-1} - \log r_{t-1} - \alpha_1 \log I_{t-2} - \log \epsilon_{t-1}}{\alpha_2}
+\end{align}
+
+This new representation of $S$ refers only to lagged terms of $I$ and
+parameters.  It can be exponentiated and used to replace $S_{t-2}$ in the infectious
+equation.  
+
+\begin{align}
+I_t &= r_t I_{t-1}^{\alpha_1} 
+	\left[
+		B_{t-1-d} + \exp\left(
+			\frac{\log I_{t-1} - \log r_{t-1} - \alpha_1 \log I_{t-2} - \log \epsilon_{t-1}}{\alpha_2}
+		\right) - I_{t-1} + u_{t-1}
+	\right]^{\alpha_2} \epsilon_{t} \\
+\end{align}
+
+Using the log of this equation can clarify the role of different terms:
+
+\begin{align}
+\log I_t &= \log r_t + \alpha_1 \log I_{t-1} + \\
+				 &	\alpha_2 \log \left[
+		B_{t-1-d} + \exp\left(
+			\frac{\log I_{t-1} - \log r_{t-1} - \alpha_1 \log I_{t-2} - \log \epsilon_{t-1}}{\alpha_2}
+		\right) - I_{t-1} + u_{t-1}
+	\right] + \log \epsilon_{t}
+\end{align}
+
+The multiplicative error terms appear in log form everywhere so their
+expectation will be zero.  In the exponentiated term the (log) ratio of
+infected individuals in two previous time steps appears.  Though the
+equation is stated in terms of infected counts it could equally be
+stated using the reporting equation and case counts rather than true
+counts. 
+
+\section{Multi-strain non-interacting SI}
+A similar transformation is also possible for a multi-strain SI model
+with non-interacting strains.  In this case we need to keep track of
+strain-specific susceptibility and infection, which we do by
+subscripting with one bit per strain.  An individual susceptible to all
+strains is denoted as $S_{0000}$ and an individual immune to all but
+the third strain is denoted as $S_{1101}$.  An individual susceptible to
+to the third strain but with unknown status with regards to all others
+is denoted as $S_{xx0x}$.  This last notation refers to a sum:
+
+\begin{align}
+	S_{(0xxx),t} &= S_{(0000),t} + S_{(0100),t} + S_{(0010),t} + \\
+							 &+ S_{(0001),t} + S_{(0110),t} + S_{(0011),t} + \\
+							 &+ S_{(0101),t} + S_{(0111),t}
+\end{align}
+
+With this notation in hand we can write the dynamics equations following
+the example of the SI model.  
+
+\begin{align}\label{eq:sir-multistrain}
+	I_{(1xxx),t} &= r_{1,t} I_{(1xxx),t-1}^{\alpha_1} S_{(0xxx),t-1}^{\alpha_2} \epsilon_{t} \\
+	S_{(0xxx),t} &= B_{t-d} + S_{(0xxx),t-1} - I_{(1xxx),t} + u_t
+\end{align}
+
+As before, $I_t$ is observed---at least in serotype-specfic data---and
+the goal is to substitute out $S_t$ in all equations.  Immediately we
+notice that indexing by strain susceptibility in the case of
+non-interacting strains does not affect equation structure and we can
+recycle the solution from original single-strain case.
+
+\begin{align}
+	\log I_{(1xxx),t} &= \log r_{1,t} + \alpha_1 \log I_{(1xxx),t-1} + \\
+				 &	\alpha_2 \log \left[
+		B_{t-1-d} + \exp\left(
+			\frac{\log I_{(1xxx),t-1} - \log r_{1,t-1} - \alpha_1 \log
+			I_{(1xxx),t-2} - \log \epsilon_{t-1}}{\alpha_2}
+		\right) - I_{(1xxx),t-1} + u_{t-1}
+	\right] + \log \epsilon_{t}
+\end{align}
+
+Ultimately the change is trivial because there are no interactions and
+we are monitoring an important state variable.  
+
+\section{Multi-strain interacting SI}
+
+As a next step, we introduce interactions into the multi-strain SI
+model.  In this model the immune history of the individualis allowed to
+affect the infection rate.  Due to this change we can no longer lump
+all susceptible individuals together in a sum term which complicates the
+process of removing susceptibles from the equation.  Conveniently, the
+infected individuals still function only as a group regardless of their
+previous infection status.
+
+\begin{align}\label{eq:sir-interacting}
+I_t &= r_t I_{t-1}^{\alpha_1} S_{t-1}^{\alpha_2} \epsilon_{t} \\
+S_t &= B_{t-d} + S_{t-1} - I_t + u_t
+\end{align}
+
+

@@ -1,0 +1,201 @@
+
+\chapter{A generic error structure for continuous-time dynamics.}
+
+Real-time data commonly arrives with a variety of associated time
+scales. Working with continuous time provides two key advantages
+for model building.  Decisions about how to align varying time frames can be deferred
+until later so that they do not drive the choice of model structure.
+
+
+\section{Poisson process basics}
+
+When describing a dynamical system we start with an arbitrary but smooth
+intensity function which describes the instantenous rate of events
+(e.g.- cases per day).  We are interested in producing a model for the
+intensity function, written $\lambda(t)$, which describes this rate 
+as a function of time.  
+
+One obstacle we face is that we do not measure
+the intensity directly, instead we measure the number of cases, $Y$,
+arriving between time $s$ and time $t$.  To be exact we choose to use a  
+half-open interval, $(s,t]$, to describe the period of time.  Using the
+half-open interval simplifies future calculations and data preparation
+by making it possible to combine intervals without calculating overlap
+and to assign data unambiguously to intervals.  The complete notation
+for a measurement is then $Y_{s,t,i}$ which indicates the count ($Y$),
+the ends of the interval $(s,t)$, as well as an index for additioal 
+covariates measured at the batch level.
+
+
+\subsection{Homogenous Poisson process approximation}
+
+In the standard application of the homogenous Poisson process, the
+parameter, $m$, for the Poisson distribution can be 
+calculated as the product of the fixed rate, $\lambda_i$ for batch $i$, and the
+duration of time $t-s$.  This is can be thought of as a Poisson
+regression where $t-s$ functions as the exposure adjustment. If $\lambda$ is 
+allowed to vary by batch, this can describe a time-varying process, but at the 
+cost of discontinuities.
+
+<<discrete-homo-poisson-process>>=
+time <- 1:10
+rate <- seq(from=11, to=20, length.out=length(time))
+n_per_batch <- 5
+data <- data.frame(
+	time = rep(time,n_per_batch),
+	rate = rep(rate,n_per_batch)
+)
+data[['count']] <- rpois(n=nrow(data), lambda=data[['rate']])
+data <- data[order(data[['time']]),]
+
+f <- function(lambdas) {
+	data[['lambda']] <- lambdas[data[['time']]]
+	ll <- sum(dpois(x=data[['count']], lambda=data[['lambda']], log=TRUE))
+	return(-ll)
+}
+
+optzd <- optim(
+	par = 12:21, 
+	fn = f, gr=NULL,
+	method = c("L-BFGS-B"),
+	lower=10^-10, upper=50
+)
+
+g <- function(t) optzd[['par']][floor(t)+1]
+
+ptzd <- data.frame(
+	x = 0:9+.5,
+	y = g(0:9+0.5)
+)
+
+library(ggplot2)
+pl <- ggplot(
+	data=data, 
+	aes(x=time-0.5, y=count)
+) + geom_point() +
+		geom_bar( data=ptzd, aes(x=x,y=y), alpha=0.4, stat='identity')
+@
+
+<<save-discrete-homo, cache=FALSE>>=
+saveRDS(object=pl, file=file.path(figure_dir,'discrete-homo-poisson-process.rds'))
+@
+
+<<print-discrete-homo, dev='pdf', fig.cap="Counts drawn from a Poisson distribution with time-varying rate.  Shaded areas describe the estimated probability mass function.  When boundaries between batches are biologically relevant this model is appropriate, but if boundaries are fluid the interpretability of the parameter at the boundary is limited.">>= 
+pl <- readRDS(file=file.path(figure_dir, 'discrete-homo-poisson-process.rds'))
+print(pl)
+@
+
+As long as data is collected over well defined periods which match the
+biological process being observed, the discontinuities are unimportant.
+Sometimes, collection times vary and they may not be timed to changes in
+the evolution of the biological process or the biological process may
+be very dynamic as well as continuous which makes it difficult to time
+data collection such that per-batch rate estimates are biologically
+meaningful.  
+
+
+\subsection{Inhomogenous Poisson process (IHPP)}
+
+One way to avoid introducing the ambiguities that come with discrete
+parameter batches is to use a continuous formulation of the Poisson
+process which allows for a time-varying rate.  For any particular
+count, $Y_{s,t,i}$, there is still a single paramter $m$, but now the
+rate over the interval $(s,t]$ varies so we can no longer find the area, 
+$m$, by multiplying the rate by the interval duration.  Instead we
+define the intensity (or rate) function $\lambda(t)$ over the course
+of the experiment.  To find the area $m_i(s,t)$ we use integration:
+
+\begin{align}
+	m_i(s,t) = \int_s^t \lambda_i(x)dx
+\end{align}
+
+Each count from a batch is still modeled as a Poisson distributed
+random variable with parameter $m_i(s,t)$.  
+
+<<cont-inhomo-poisson-process>>=
+library(cruftery)
+data <- data.frame(
+	x=seq(from=0, to=10, length.out=10^3),
+	y=gaussian_spline(x=seq(from=0, to=10, length.out=10^3),
+	knot_points=2:8, knot_weights=exp(rnorm(7))*2+c(0,2,2,2,rep(0,3)), knot_scale=0.5)
+)
+shade <- data[data[['x']] >= 3 & data[['x']] < 5,]
+shade <- rbind(
+	data.frame(x=3,y=0),
+	shade,
+	data.frame(x=5,y=0)
+)
+
+
+pl <- ggplot(data=data, aes(x=x, y=y)) + geom_line() + 
+			geom_polygon(data=shade, aes(x=x, y=y), alpha=0.3) +
+			xlab('Time (days)') + ylab('Intensity (Cases per day)') +
+			annotate("text", x=3, y=-.2, label="s") +
+			annotate("text", x=5, y=-.2, label="t") +
+			annotate("text", x=4, y= .8, label=
+				"m(s,t)==integral(lambda(x)*dx,s,t)", parse=TRUE)
+@
+
+<<save-cont-inhomo, cache=FALSE>>=
+saveRDS(object=pl, file=file.path(figure_dir,'cont-inhomo-poisson-process.rds'))
+@
+
+<<print-cont-inhomo, dev='pdf', fig.cap="Counts drawn from a Poisson distribution with time-varying rate.  The curve is the intensity function in units of cases per day, which is integrated to give the Poisson distribution parameter.">>=
+pl <- readRDS(file=file.path(figure_dir, 'cont-inhomo-poisson-process.rds'))
+print(pl)
+@
+
+The inhomogenous poisson process makes an effective bridge between a
+process conceptualized as continuous and real data collected on varying
+time scales in a discrete fashion.  The focus of any further effort
+can be on the function $\lambda(t)$ which is the rate of cases per
+unit time.  The remaining difficulty is choosing a form of $\lambda(t)$
+which is easy to integrate and allows us to apply the usual ameneties
+of statistics---design matrices and linear models.
+
+\section{Poisson process implementation}\label{sec:ihpp-implementation}
+
+The two conditions on $\lambda(t)$ are that it should be easy to
+integrate and that is should be amenable to further modeling.  For
+this second reason, we choose to use a semiparameteric radial spline.
+We spread $K$ knot points over the time period covered by the data
+and use the normal distribution as a basis function.  The basis set is
+then the set of normals centered on each knot point.  The function
+$\lambda(t)$ then becomes a weighted sum of $K$ normals.
+
+\begin{align}
+\lambda(x) &= \sum_{k=1}^K \beta_k \frac{1}{\sqrt{2\pi}\sigma^2} \exp(\frac{1}{2\sigma^2}\left(x-\mu_k\right)^2)
+\end{align}
+
+This formulation allows us to further model the weights $\beta_k$ to
+describe the effects relevant to a specific portion of time without
+introducing discontinuities in the intensity function while still making
+the function very flexible.  Formulating the intensity function as a sum
+of normal densities also makes analytical integration possible as long
+as the function has a known $CDF$.  Abusing notation slightly, the 
+calculation of $m(s,t)$ becomes:
+
+\begin{align}
+m(s,t) &= \int_s^t \sum_{k=1}^K \beta_k PDF_N(x,\mu_k,\sigma^2) dx \\
+			 &= \sum_{k=1}^K \beta_k \left(CDF_N(t,\mu_k,\sigma^2) - CDF_N(s,\mu_k,\sigma^2) \right)
+\end{align}
+
+Since calculations of many $CDF$'s, including the normal, are
+efficiently coded in many libraries this is a generic strategy for
+applying the IHPP to a variety of problems.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

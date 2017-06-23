@@ -1,0 +1,99 @@
+
+\chapter{Count data simulation for a continuous-time dynamics.}
+
+For a simulation where the timing of events wihin batches is not
+important but the number of events in a batch is important, it is
+possible to avoid dealing with timing entirely and simply simulate
+from the Poisson process conditional on $m(s,t)$ for each batch.
+The key point for such a simulation becomes the calculation of $m(s,t)$.
+
+To simulate event timing a thinning (rejection) algorithm is available which and
+its efficiency depends on how well the proposed event distribution
+matches the function $\lambda(t)$ as used for simulation or estimation.
+
+\section{Splines for generating a smooth function}
+
+To evaluate models constructed based on this Poisson process formulation
+it will be important to have a way of simulating from the Poisson
+process as described above and evaluating our ability to recover
+parameters.  The appropriate splines and their integrals can be
+constructed from a small set of R functions which implement the
+calculations described in section \ref{sec:ihpp-implementation}.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{read_chunk}\hlstd{(}\hlstr{'~/packages/cruftery/package_dir/R/spline_functions.R'}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+For any spline the function value at point x can be described as a
+function of the basis function.  The rest of the calculations are
+generic.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Generic radial spline:}
+\hlstd{radial_spline} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,} \hlkwc{f}\hlstd{,} \hlkwc{knot_points}\hlstd{,} \hlkwc{knot_weights}\hlstd{,} \hlkwc{knot_scale}\hlstd{) \{}
+  \hlkwa{if} \hlstd{(}\hlkwd{length}\hlstd{(x)} \hlopt{==} \hlnum{1}\hlstd{) \{}
+    \hlstd{knot_contributions} \hlkwb{<-} \hlkwd{f}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{center}\hlstd{=knot_points,} \hlkwc{scale}\hlstd{=knot_scale)}\hlopt{*}\hlstd{knot_weights}
+    \hlkwd{return}\hlstd{(}\hlkwd{sum}\hlstd{(knot_contributions))}
+  \hlstd{\}} \hlkwa{else} \hlstd{\{}
+    \hlkwd{return}\hlstd{(}\hlkwd{sapply}\hlstd{(x,radial_spline,} \hlkwc{f}\hlstd{=f,} \hlkwc{knot_points}\hlstd{=knot_points,} \hlkwc{knot_weights}\hlstd{=knot_weights,} \hlkwc{knot_scale}\hlstd{=knot_scale))}
+  \hlstd{\}}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+The generic spline function can be specialized for a gaussian spline
+as follows.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Generic radial spline specialized to Gaussian.}
+\hlstd{gaussian_spline} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,} \hlkwc{knot_points}\hlstd{,} \hlkwc{knot_weights}\hlstd{,} \hlkwc{knot_scale}\hlstd{) \{}
+  \hlstd{f} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,} \hlkwc{center}\hlstd{,} \hlkwc{scale}\hlstd{)} \hlkwd{dnorm}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{mean}\hlstd{=center,} \hlkwc{sd}\hlstd{=scale)}
+  \hlkwd{return}\hlstd{(}\hlkwd{radial_spline}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{f}\hlstd{=f,} \hlkwc{knot_points}\hlstd{=knot_points,} \hlkwc{knot_weights}\hlstd{=knot_weights,} \hlkwc{knot_scale}\hlstd{=knot_scale))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+The integral can be coded in terms of R's CDF functions.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Integral of Gaussian radial spline.}
+\hlstd{gaussian_spline_integral} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{knot_points}\hlstd{,} \hlkwc{knot_weights}\hlstd{,} \hlkwc{knot_scale}\hlstd{,} \hlkwc{a}\hlstd{,} \hlkwc{b}\hlstd{) \{}
+  \hlstd{contributions} \hlkwb{<-} \hlkwd{mapply}\hlstd{(}
+    \hlkwc{FUN}\hlstd{=}\hlkwa{function}\hlstd{(}\hlkwc{point}\hlstd{,} \hlkwc{weight}\hlstd{,} \hlkwc{scale}\hlstd{,} \hlkwc{a}\hlstd{,} \hlkwc{b}\hlstd{) \{}
+      \hlstd{weight} \hlopt{*} \hlstd{(}\hlkwd{pnorm}\hlstd{(}\hlkwc{q}\hlstd{=b,} \hlkwc{mean}\hlstd{=point,} \hlkwc{sd}\hlstd{=scale)} \hlopt{-} \hlkwd{pnorm}\hlstd{(}\hlkwc{q}\hlstd{=a,} \hlkwc{mean}\hlstd{=point,} \hlkwc{sd}\hlstd{=scale))}
+    \hlstd{\},}
+    \hlkwc{point} \hlstd{= knot_points,} \hlkwc{weight} \hlstd{= knot_weights,}
+    \hlkwc{MoreArgs} \hlstd{=} \hlkwd{list}\hlstd{(}\hlkwc{scale}\hlstd{=knot_scale,} \hlkwc{a}\hlstd{=a,} \hlkwc{b}\hlstd{=b)}
+  \hlstd{)}
+  \hlkwd{return}\hlstd{(}\hlkwd{sum}\hlstd{(contributions))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Given the spline integral function, it is simple to calculate $m(s,t)$
+and simulate the number of events in a batch as:
+
+\begin{align}
+X \sim Poi(m(s,t)) 
+\end{align}
+
+
+
+
+
+
+
+
+
+

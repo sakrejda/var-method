@@ -1,0 +1,54 @@
+\begin{abstract}
+Motivation:
+\begin{enumerate}
+\item VAR(p) form a basic class of models used for prediction in multiple
+contexts (econometric tradition, ecology).  
+\item After fitting, VAR(p) models are often analyzed for stability
+(econometric, population biology cites) via a variety of
+Eigen-decomposition based numerical methods which produce information on
+long-run growth (stationarity/nonstationarity/near-non-stationarity),
+oscillations (imaginary eigenvalues), transient dynamics and dampening
+or instability).   
+\item An alternative view of these diagnostic numbers sees them as
+meaningful parameters in a generative model.
+\item This alternative view suggests that we could place weak priors on
+these parameters and encourage models that produce stable numbers.
+\item Such models could still be checked for fit and predictive performance
+\item In public health such models could be made to match the expert expectations that
+under certain conditions specific diseases either fade or grow
+explosively (unless mediated by interventions).  
+\item Models tuned based on these priors should be viewed as:
+ - descriptive and predictive, encoding an expert-driven bias.
+ - in live prediction exercises, comparing biased model predictions to
+   data is particularly critical to indicate when a model fails to
+   capture unusual features (those that go against regularizing priors).
+\end{enumerate}
+
+Methods:
+\begin{enumerate}
+\item VAR(p) models can be re-written as VAR(1) models with a structured
+projection matrix of coefficients, identity sub-matrices, and zero
+sub-matrtices.
+\item Eigenvalue decomposition of the fitted matrix can be used
+diagnostically to indicate whether the fitted model represents a
+stationary system, how fast the stationary system will return to
+equilibrium after a disturbance, how strong the tendency to oscillate 
+is, what periodicity/ies of oscillations is/are important.  These
+features are used diagnostically after fitting a VAR(p) model to data.
+\item Knowledge of infectious disease dynamics can also be encoded using 
+the metrics derived from the components of an Eigenvalue decomposition.
+For example infectious disease systems are known to be at least weak
+stationary in endemic settings and nearly non-stationary models \emph{can} be
+used to model hyperendemic settings.
+\item We translate a series of [specific statements] on endemic and
+hyperendemic infectious disease time series behavior into priors on
+components of the Eigenvalue decomposition of a projection matrix.  
+\item We characterize outputs of prior simulations based on reconstructing
+the projection matrix from these prior components.
+\item We fit VAR(p) models to simulated time series including seasonal, stationary,
+and nearly non-stationary series.
+\item We fit VAR(p) models to dengue data, we incorporate a reporting delay
+model, we compare predictions to SPAMD/prior-unconstrained
+SARIMA/frequentist SARIMA/MOA
+\end{enumerate}
+\end{abstract}

@@ -1,0 +1,12 @@
+\BOOKMARK [0][-]{chapter.1}{The SIR model can be restated to ignore susceptibles.}{}% 1
+\BOOKMARK [1][-]{section.1.1}{SI case}{chapter.1}% 2
+\BOOKMARK [1][-]{section.1.2}{Multi-strain non-interacting SI}{chapter.1}% 3
+\BOOKMARK [1][-]{section.1.3}{Multi-strain interacting SI}{chapter.1}% 4
+\BOOKMARK [0][-]{chapter.2}{A generic error structure for continuous-time dynamics.}{}% 5
+\BOOKMARK [1][-]{section.2.1}{Poisson process basics}{chapter.2}% 6
+\BOOKMARK [1][-]{section.2.2}{Poisson process implementation}{chapter.2}% 7
+\BOOKMARK [0][-]{chapter.3}{Count data simulation for a continuous-time dynamics.}{}% 8
+\BOOKMARK [1][-]{section.3.1}{Splines for generating a smooth function}{chapter.3}% 9
+\BOOKMARK [0][-]{chapter.4}{Reporting in the Poisson process context.}{}% 10
+\BOOKMARK [1][-]{section.4.1}{Modeling observed reporting data.}{chapter.4}% 11
+\BOOKMARK [1][-]{section.4.2}{The reporting problem in the Poisson process model.}{chapter.4}% 12

@@ -1,0 +1,80 @@
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start Preamble:
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[letterpaper,11pt,oneside,article]{memoir}
+
+\setstocksize{279.4mm}{215.9mm}
+\settrimmedsize{\stockheight}{\stockwidth}{*}
+%\settypeblocksize{279.4mm}{*}{.65}
+\setlrmarginsandblock{30mm}{60mm}{*}
+%\setlength{\marginparwidth}{65mm}
+\checkandfixthelayout
+
+% These work nicely together for a work with lots of margin notes:
+%\setlrmarginsandblock{30mm}{80mm}{*}
+%\setmarginnotes{5mm}{65mm}{5mm}
+
+\input{preamble.tex}
+
+\title{Dengue Dynamics}
+\author{Krzysztof Sakrejda}
+\date{\today}  % if the \date{} command is left out, current date will be used
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% End Preamble
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\maketitle % this prints the handout title, author, and date
+\input{abstract.tex}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Chapters:
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{Spacing}{2}
+%\linenumbers
+
+% knitr preliminaries
+<<scripts, cache=FALSE>>=
+library(knitr)
+read_chunk(file.path(R_dir,'shared_data.R'))
+read_chunk(file.path(R_dir,'approximation-plot.R'))
+@
+
+<<libraries, cache=FALSE>>=
+@
+
+<<db-connector, cache=FALSE>>=
+@
+
+% Meat
+\input{sir-no-susceptibles.tex}
+\input{observation-process.tex}
+\input{poisson-process-skeleton.tex}
+\input{poisson-process-simulation.tex}
+\input{poisson-process-observation.tex}
+\input{direct-model-observation.tex}
+
+% Extras
+%\appendix
+%\input{appendix.tex}
+
+% Cruft
+
+
+%\end{Spacing}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% End of Document:
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{ecology}
+\bibliography{/home/krzysiek/texmf/tex/bibtex/references}
+
+\end{document}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

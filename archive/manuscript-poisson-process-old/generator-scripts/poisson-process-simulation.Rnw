@@ -1,0 +1,58 @@
+
+\chapter{Count data simulation for a continuous-time dynamics.}
+
+For a simulation where the timing of events wihin batches is not
+important but the number of events in a batch is important, it is
+possible to avoid dealing with timing entirely and simply simulate
+from the Poisson process conditional on $m(s,t)$ for each batch.
+The key point for such a simulation becomes the calculation of $m(s,t)$.
+
+To simulate event timing a thinning (rejection) algorithm is available which and
+its efficiency depends on how well the proposed event distribution
+matches the function $\lambda(t)$ as used for simulation or estimation.
+
+\section{Splines for generating a smooth function}
+
+To evaluate models constructed based on this Poisson process formulation
+it will be important to have a way of simulating from the Poisson
+process as described above and evaluating our ability to recover
+parameters.  The appropriate splines and their integrals can be
+constructed from a small set of R functions which implement the
+calculations described in section \ref{sec:ihpp-implementation}.
+
+<<include-spline-funcs, cache=FALSE>>=
+read_chunk('~/packages/cruftery/package_dir/R/spline_functions.R')
+@
+
+For any spline the function value at point x can be described as a
+function of the basis function.  The rest of the calculations are
+generic.
+
+<<generic-radial-spline, cache=FALSE>>=
+@
+
+The generic spline function can be specialized for a gaussian spline
+as follows.
+<<gaussian-radial-spline, cache=FALSE>>=
+@
+
+The integral can be coded in terms of R's CDF functions.
+<<gaussian-spline-integral, cache=FALSE>>=
+@
+
+Given the spline integral function, it is simple to calculate $m(s,t)$
+and simulate the number of events in a batch as:
+
+\begin{align}
+X \sim Poi(m(s,t)) 
+\end{align}
+
+
+
+
+
+
+
+
+
+

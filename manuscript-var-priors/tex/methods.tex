@@ -1,0 +1,136 @@
+\section{VAR(p), VAR(1) formulations}
+A vector auto-regressive model for $K$ states with $p$ lags, typically written as VAR(p),
+can be written in one form as:
+
+\begin{equation}
+\vec{y}_t = \vec{\mu} + \mathbf{A_1}\vec{y}_{t-1} + \ldots +
+\mathbf{A_p}\vec{y}_{t-p} + \vec{\epsilon_t}
+\end{equation}
+
+It can also always be re-written as a VAR(1) model after some
+index-shuffling:
+
+\begin{equation}
+\mathbf{Y_t} = \begin{bmatrix*}[l]
+\vec{y}_t \\ \vec{y}_{t-1} \\ \ldots \\ \vec{y}_{t-p+1}
+\end{bmatrix*}
+\text{, }
+\mathbf{U} = \begin{bmatrix}
+\vec{\mu} \\ 0 \\ \ldots \\ 0 
+\end{bmatrix}
+\text{, }
+\mathbf{Z}_t = \begin{bmatrix}
+\vec{\epsilon_t} \\ 0 \\ \ldots \\ 0 
+\end{bmatrix}
+\end{equation}
+
+The VAR(p) model can then be written as a VAR(1) model for $Y_t$
+
+\begin{equation}
+\mathbf{Y}_t = \mathbf{U} + \begin{bmatrix}
+  \mathbf{A_1} \mathbf{A_2} \ldots \mathbf{A_p} 
+\end{bmatrix} \mathbf{Y}_{t-1} + \mathbf{Z}_t
+\end{equation}
+
+This variation is interesting because Eigenvalue decomposition can be
+applied to $\mathbf{A}$ to produce model diagnostic components.  The
+Eigenvalue decomposition separates $\mathbf{A}$ into two matrices.
+Matrix $\mathbf{B}$ is the same dimensions as $\mathbf{A}$, and its
+columns are orthonormal and referred to as the Eigenvectors of
+$\mathbf{A}$.  The matrix $\mathbf{\Lambda}$ is diagonal and
+contains the eigenvalues of $\mathbf{A}$. The decomposition is:
+
+\begin{equation}
+\mathbf{A} = \mathbf{B} \mathbf{\Lambda} \mathbf{B}^{-1}
+\end{equation}
+
+From our perspective we could begin with priors on $\mathbf{B}$ and
+$\mathbf{\Lambda}$, and construct $\mathbf{A}$ in the model.  
+
+\section{Eigenvalue desiderata}
+We are not looking for a generic prior over all of $\mathbf{B}$ and
+$\mathbf{\Lambda}$, but for
+priors on the components and sometimes priors that establish
+relationships among the components.  Some examples:
+
+\begin{enumerate}
+\item The largest absolute Eigenvalue should be less than 1.  That is,
+the system should return towards a specific mean and finite variance
+after disturbance.
+\item The ratio between the largest absolute Eigenvalue and the next
+largest should be "large enough".  That is the return to the stationary 
+distribution should be on a time-scale relevant to the system of interets.
+Making this statement scale-free in some way (or related to a
+time-series length/seasonality parameter would be useful).
+\item This should be true of all pairs of Eigenvalues---so some prior
+relationship on all $(K\times p)-1$ ratios would be useful (for $K\times
+p$ Eigenvalues).
+\item For stable (well, stationary) systems, we are often interested in modeling the
+occasional excursions from what is "typical" (i.e.-the typical epidemic
+is something a healh system is made to handle, the atypical epidemic is
+what they would like to have predictions for.
+\item The dominant right (?) Eigenvector should (for appropriately scaled
+timeseries used in the model) contain values mostly on the same order of
+magnitude, although some may be very small.  This is an attempt to be
+precise about the idea that, after scaling, we expect the model to
+represent mostly time-series which will in the future be non-zero. 
+\item In population biology there's some theory where the dominant left (?)
+Eigenvector represents the "future reproductive value of the current
+population in each class".  I'm not comfortable with the interpretation
+in that context so I'll have to nail it down some more...
+\end{enumerate}
+
+
+\section{Decomposition problems}
+
+The \emph{Eigenvalue desiderata} section is written as though we want
+priors on all of $\mathbf{A}$ in the VAR(1) formulation.  However, much
+of the VAR(1) formulation is book-keeping s.t. the portions of
+$\mathbf{Y_{t-1}}$ which appear in $\mathbf{Y_t}$ are placed in the the
+proper entries of $\mathbf{Y_t}$.  Dealing with the Eigenvalue
+decomposition for the full $K*p$ Eigenvalues and Eigenvectors would
+require us to restrict some values/vectors s.t. the entries of
+$\mathbf{A}$ dealing purely with indexing were correctly re-created. 
+
+In practice we only want to deal with the upper $K$ rows of
+$\mathbf{A}$ and leave the lower $(K\times p) - K$ rows as specified
+(sub-diagonal identity sub-matrices and remaining all-zeros).  In matrix
+notation:
+
+\begin{equation}
+\mathbf{A} = \begin{bmatrix*}
+\mathbf{A}_1       & \mathbf{A}_2     & \ldots & \ldots & \mathbf{A}_{p-1} & \mathbf{A}_p    \\ 
+I_K       & 0      & \ldots & 0       & 0  & 0     \\ 
+0         & I_K    & 0      & \vdots   & \vdots & \vdots      \\ 
+\vdots    & 0      & \ddots & \vdots  & \vdots & \vdots      \\
+\vdots    & \vdots &        &         & 0      & \vdots      \\ 
+0         & 0      & \ldots & 0       & I_K    & 0 
+\end{bmatrix*}
+\end{equation}
+
+Which means we only need a decomposition for the $K\times (K \times p)$
+matrix $\mathbf{A}^*$, written in matrix notation:
+
+\begin{equation}
+\mathbf{A}^* = \begin{bmatrix*}
+\mathbf{A}_1       & \mathbf{A}_2    & \ldots & \mathbf{A}_{p-1} & \mathbf{A}_p     
+\end{bmatrix*}
+\end{equation}
+
+The Eigenvalue decomposition (EVD) is non-sensical here since the matrix is
+not square, but the Singular Value Decompositoin (SVD) defines the
+corresponding decomposition for non-square matrices and should be
+usable.  
+
+\begin{itemize}
+\item I don't know if the conditions on Eigenvalues/Eigenvectors
+translate directly into conditions on singular values and vectors from
+the SVD.
+\item How many singular values should there be here anyway, $K$, I
+think, not $K\times p$, but not sure.  This should come out of the SVD
+definition here.
+\item Are some of the entries of the singular value vectors going to be
+zero?  Are some singular vectors going to be all-zero? This should also
+be clear from the SVD definition.
+\end{itemize}
+

@@ -1,0 +1,66 @@
+\chapter{Observation processes in Dengue reporting}
+
+In the context of infectious disease, the observation or reporting
+process refers to a variety of different processes:
+
+\begin{enumerate}
+\item Some individuals are infected but never manifest significant
+symptoms and fail to meet the classification of disease which exists at
+the time.  These are often referred to as silent infections
+\item Some individuals are infected but for any number of reasons their
+cases are not recorded in the reporting system.  They may be symptomatic
+but never present at a medical facility for care, they may present but
+be misdiagnosed, or they may be diagnosed correctly but the diagnosis
+does not translate into a case report.  
+\item Some individuals are diagnosed and the diagnosis generates a case
+report, but the report may be delayed for organisational reasons and
+unavailable for some period of time.
+\end{enumerate}
+
+In the Thai data all three are certainly in play.  The fraction of cases
+reported for the mildest cases of Dengue (Dengue fever, DF, code 66) may  
+change dramatically over time as reporting practices change.  It is unclear 
+what proportion of cases in this category present for treatment or what
+proportion of cases presenting are correctly categorized.  For this
+reason our historical data summary (pre-1999) excludes these cases.  
+
+\marginpar{
+	Q1: What proprtion of Dengue Fever (66) cases present for medical
+	treatment.
+	Q2: What proportion of Dengue Fever cases are correctly diagnosed?
+	This has to have spatical/facility variation and depend on the
+	diagnostic method.
+}
+
+More severe cases which would be classified as Dengue hemorrhagic fever
+(DHF, code 26) or Dengue Shock Syndrome (DSS, code 27) are unlikely to
+go unreported because they have much more distinct symptoms which define
+their classification and likely trigger more exacting testing for
+pathogen identification but a small portion may still not appear due to
+organisational reasons.  
+
+\section{Timing of reporting for live case prediction}
+
+In all cases the transition from presentation to diagnosis to case
+report generation to data aggregation introduces delays in the reporting
+process.  This is not an important issue when analyses are conducted
+after the yearly final reports are generated (mid-April of the following
+year in the Thai system).  For analyses which are conducted on real-time
+data, the reporting delays may be significant.  
+
+\section{Notation for reporting rates.}
+
+\begin{enumerate}
+\item Cases arrive continuously over time.
+\item Cases are assigned a date of illness ($t_s$).
+\item Cases are assigned a date of report ($t_r$).
+\item We calculate a reporting interval ($t_d$) which describes the
+delay between when a case occurs and when a case is available for
+analysis.  Conceptually we treat this as a real number but in practice
+the resolution of this measurement is restricted to a number of days.  
+\item More precisely, $t_d = t_r - t_s$, which implies $t_d \in
+\mathbb{R}$, though this concept is leaky as, e.g., $t_d=0$ is never
+observed.
+\end{enumerate}
+
+

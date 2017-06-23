@@ -1,0 +1,43 @@
+\raggedbottom  % To avoid making LaTeX try to keep amount of
+               % text vertically on page constant:
+
+% To allow insertion of figures (jpeg, eps, etc..):
+\usepackage{graphicx}
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+\graphicspath{{graphics/}}
+
+
+\usepackage{ucs}        % Unicode (still needed?)
+\usepackage[utf8x]{inputenc}   % Unicode (still needed?)
+\usepackage{cancel}                       % For cancelling equations
+\usepackage{helvet}
+\usepackage{booktabs}  % Pretty tables
+\usepackage{units} % The units package provides nice, non-stacked
+                   % fractions and better spacing for units.
+%\usepackage{multirow}   % Allows columns to span multiple
+                         % rows in {tabular} environment
+\usepackage{amssymb}
+\usepackage{amsmath} % To allow complex math symbols
+\usepackage{wrapfig}
+\usepackage{hyperref}
+\usepackage{lineno}
+
+\usepackage{tikz}
+\tikzstyle{ov}=[shape=rectangle,
+                 draw=black!80,
+                 minimum height=0.75cm,
+                 minimum width=1cm,
+                 thick]
+
+\tikzstyle{av}=[shape=rectangle,
+                 draw=black!80,
+                 fill=black!10,
+                 minimum height=1cm,
+                 minimum width=1cm,
+                 thick]
+
+\tikzstyle{lv}=[shape=circle,
+                  draw=black!80,
+                  thick,
+                  minimum width=1.5cm]
+\usepackage{natbib} % For citations
